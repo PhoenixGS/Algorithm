@@ -1,120 +1,135 @@
 #include <cstdio>
 #include <cstring>
 #include <queue>
+#include <algorithm>
 
-int size;
-int ch[10000][30];
-int val[10000];
-int f[10000];
-int last[10000];
-char st[10000];
-char P[10000];
-int n;
+int n, m;
+int knum;
+unsigned short int ch[100005][30];
+int f[100005];
+int last[100005];
+int value[100005];
+char st[20000];
+int anss;
+int ans[100];
+int cnt;
 
-char id(char x)
-{
-	return x - 'a';
-}
-
-void insert(char* s, int v)
+void add(char *st, int id)
 {
 	int u = 0;
-	int n = strlen(s + 1);
+	int n = strlen(st + 1);
 	for (int i = 1; i <= n; i++)
 	{
-		int c = id(s[i]);
-		if (! ch[u][c])
+		if (! ch[u][st[i] - 'a'])
 		{
-			size++;
-			memset(ch[size], 0, sizeof(ch[size]));
-			val[size] = 0;
-			ch[u][c] = size;
+			knum++;
+			ch[u][st[i] - 'a'] = knum;
 		}
-		u = ch[u][c];
+		u = ch[u][st[i] - 'a'];
 	}
-	val[u] = v;
-}
-
-void print(int i, int j)
-{
-	if (j)
-	{
-		printf("%d %d\n", i, val[j]);
-		print(i, last[j]);
-	}
-}
-
-void find(char * T)
-{
-	int n = strlen(T + 1);
-	int j = 0;
-	for (int i = 1; i <= n; i++)
-	{
-		int c = id(T[i]);
-		j = ch[j][c];
-		if (val[j])
-		{
-			print(i, j);
-		}
-		else
-		{
-			if (last[j])
-			{
-				print(i, last[j]);
-			}
-		}
-	}
+	value[u] = id;
 }
 
 void getFail()
 {
 	std::queue<int> que;
 	f[0] = 0;
-	for (int c = 0; c < 26; c++)
+	last[0] = 0;
+	for (int i = 0; i < 26; i++)
 	{
-		int u = ch[0][c];
+		int u = ch[0][i];
 		if (u)
 		{
-			f[u] = 0;
 			que.push(u);
+			f[u] = 0;
 			last[u] = 0;
 		}
 	}
 	while (! que.empty())
 	{
-		int r = que.front();
+		int u = que.front();
 		que.pop();
-		for (int c = 0; c < 26; c++)
+		for (int i = 0; i < 26; i++)
 		{
-			int u = ch[r][c];
-			if (! u)
+			int v = ch[u][i];
+			if (! v)
 			{
-				ch[r][c] = ch[f[r]][c];
+				ch[u][i] = ch[f[u]][i];
 				continue;
 			}
-			que.push(u);
-			int v = f[r];
-			while (v && ! ch[v][c])
+			que.push(v);
+			f[v] = ch[f[u]][i];
+			last[v] = value[f[v]] ? f[v] : last[f[v]];
+		}
+	}
+}
+
+void solve(int k)
+{
+	while (k)
+	{
+		anss++;
+		ans[anss] = value[k];
+		k = last[k];
+	}
+}
+
+void find(char *s)
+{
+	int u = 0;
+	int n = strlen(s + 1);
+	for (int i = 1; i <= n; i++)
+	{
+		u = ch[u][s[i] - 'a'];
+		if (value[u])
+		{
+			solve(u);
+		}
+		else
+		{
+			if (last[u])
 			{
-				v = f[v];
+				solve(last[u]);
 			}
-			f[u] = ch[v][c];
-			last[u] = val[f[u]] ? f[u] : last[f[u]];
 		}
 	}
 }
 
 int main()
 {
-	size = 0;
-	scanf("%d", &n);
-	for (int i = 1; i <= n; i++)
+	while (scanf("%d", &n) == 1 && n)
 	{
-		scanf("%s", st + 1);
-		insert(st, i);
+		knum = 0;
+		memset(ch, 0, sizeof(ch));
+		memset(value, 0, sizeof(value));
+		memset(last, 0, sizeof(last));
+		memset(f, 0, sizeof(f));
+		for (int i = 1; i <= n; i++)
+		{
+			scanf("%s", st + 1);
+			add(st, i);
+		}
+		getFail();
+		scanf("%d", &m);
+		cnt = 0;
+		for (int i = 1; i <= m; i++)
+		{
+			scanf("%s", st + 1);
+			anss = 0;
+			find(st);
+			if (anss)
+			{
+				std::sort(ans + 1, ans + anss + 1);
+				printf("%d:", i);
+				for (int j = 1; j <= anss; j++)
+				{
+					printf(" %d", ans[j]);
+				}
+				printf("\n");
+				cnt++;
+			}
+		}
+		printf("total: %d\n", cnt);
 	}
-	getFail();
-	scanf("%s", P + 1);
-	find(P);
 	return 0;
 }
