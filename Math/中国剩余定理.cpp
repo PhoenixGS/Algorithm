@@ -45,7 +45,7 @@ int main()
 	scanf("%lld", &k);
 	for (int i = 0; i < k; i++)
 	{
-		scanf("%lld%lld", &n[i], &a[i]);
+		scanf("%lld%lld", &a[i], &n[i]);
 	}
 	printf("%lld\n", calc(a, n, k));
 	return 0;
