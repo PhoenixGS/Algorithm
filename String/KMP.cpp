@@ -1,57 +1,57 @@
 #include <cstdio>
 #include <cstring>
 
-char st[10000];
-char p[10000];
-int f[10000];
+char s[2000000];
+char t[2000000];
+int n, m;
+int f[2000000];
 
-void getFail(char* P, int* f)
+void getf()
 {
-	int m = strlen(P + 1);
+	int now = 0;
 	f[1] = 0;
-	int k = 0;
-	for (int q = 2; q <= m; q++)
+	for (int i = 2; i <= m; i++)
 	{
-		while (k > 0 && P[k + 1] != P[q])
+		while (now && t[i] != t[now + 1])
 		{
-			k = f[k];
+			now = f[now];
 		}
-		if (P[k + 1] == P[q])
+		if (t[i] == t[now + 1])
 		{
-			k++;
+			now++;
 		}
-		f[q] = k;
+		f[i] = now;
 	}
 }
 
-void find(char* T, char* P, int* f)
+void solve()
 {
-	int n = strlen(T + 1);
-	int m = strlen(P + 1);
-	getFail(P, f);
-	int q = 0; //已匹配的位数
+	int now = 0;
 	for (int i = 1; i <= n; i++)
 	{
-		while (q > 0 && P[q + 1] != T[i])
+		while (now && s[i] != t[now + 1])
 		{
-			q = f[q];
+			now = f[now];
 		}
-		if (P[q + 1] == T[i])
+		if (s[i] == t[now + 1])
 		{
-			q = q + 1;
-		}
-		if (q == m)
-		{
-			printf("%d\n", i - m + 1);
-			q = f[q];
+			now++;
+			if (now == m)
+			{
+				printf("%d\n", i - now + 1);
+				now = f[now];
+			}
 		}
 	}
 }
 
 int main()
 {
-	scanf("%s", st + 1);
-	scanf("%s", p + 1);
-	find(st, p, f);
+	scanf("%s", s + 1);
+	scanf("%s", t + 1);
+	n = strlen(s + 1);
+	m = strlen(t + 1);
+	getf();
+	solve();
 	return 0;
 }
