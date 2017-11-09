@@ -26,6 +26,6 @@ void Tarjan(int u, int father)
 	}
 	if (father == 0 && cnt > 1)
 	{
-		cnt[u] = true;
+		cut[u] = true;
 	}
 }
