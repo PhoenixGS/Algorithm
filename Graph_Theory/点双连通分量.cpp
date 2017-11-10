@@ -20,7 +20,7 @@ void Tarjan(int u, int father)
 				{
 					tmp = stack[top];
 					points[knumber].push_back(tmp);
-					belong[v].push_back(knumber);
+					belong[tmp].push_back(knumber);
 				}while(tmp != v);
 			}
 			low[u] = std::min(low[u], low[v]);
