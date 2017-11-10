@@ -20,14 +20,14 @@ void Tarjan(int u, int father)
 				{
 					tmp = stack[top];
 					points[knumber].push_back(tmp);
-					belong[u].push_back(knumber);
-				}while(t != v);
-				low[u] = std::min(low[u], low[v]);
+					belong[v].push_back(knumber);
+				}while(tmp != v);
 			}
-			else
-			{
-				low[u] = std::min(low[u], dfn[v]);
-			}
+			low[u] = std::min(low[u], low[v]);
+		}
+		else
+		{
+			low[u] = std::min(low[u], dfn[v]);
 		}
 	}
 }
