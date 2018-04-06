@@ -1,107 +1,72 @@
-#include <cstdio>
-#include <cstring>
-#include <queue>
-
-using namespace std;
-
-int edgenum;
-int vet[1000];
-int cap[1000];
-int flow[1000];
-int nextx[1000];
-int head[1000];
-bool vis[1000];
-int dis[1000];
-queue<int> Q;
-const int INF = 1000000000;
-int n, m;
-
-void add(int u, int v, int c)
+bool bfs()
 {
-	edgenum++;
-	vet[edgenum] = v;
-	cap[edgenum] = c;
-	flow[edgenum] = 0;
-	nextx[edgenum] = head[u];
-	head[u] = edgenum;
-	edgenum++;
-	vet[edgenum] = u;
-	cap[edgenum] = 0;
-	flow[edgenum] = 0;
-	nextx[edgenum] = head[v];
-	head[v] = edgenum;
-}
-
-int bfs(int s, int t)
-{
-	memset(vis, 0, sizeof(vis));
-	Q.push(s);
-	vis[s] = 1;
+	memset(dis, -1, sizeof(dis));
+	int headx = 1;
+	int tailx = 0;
+	tailx++;
+	que[tailx] = s;
 	dis[s] = 0;
-	while (! Q.empty())
+	while (headx <= tailx)
 	{
-		int u = Q.front();
-		Q.pop();
+		int u = que[headx];
+		headx++;
 		for (int i = head[u]; i; i = nextx[i])
 		{
 			int v = vet[i];
-			if (! vis[v] && cap[i] > flow[i])
+			int cost = val[i];
+			if (cost && dis[v] == -1)
 			{
-				vis[v] = 1;
 				dis[v] = dis[u] + 1;
-				Q.push(v);
+				tailx++;
+				que[tailx] = v;
 			}
 		}
 	}
-	return vis[t];
+	return dis[t] != -1;
 }
 
-int dfs(int u, int t, int maxf)
+int flow(int u, int maxflow)
 {
 	if (u == t)
 	{
-		return maxf;
+		return maxflow;
 	}
-	int ansflow = 0;
-	for (int i = head[u]; i; i = nextx[i])
+	int ans = 0;
+	for (int i = cur[u]; i; i = nextx[i])
 	{
 		int v = vet[i];
-		int f;
-		if (dis[u] + 1 == dis[v] && (f = dfs(v, t, min(maxf, cap[i] - flow[i]))) > 0)
+		int cost = val[i];
+		if (dis[u] + 1 == dis[v])
 		{
-			flow[i] += f;
-			flow[i ^ 1] -= f;
-			ansflow += f;
-			maxf -= f;
-			if (maxf == 0)
+			int f = flow(v, std::min(maxflow - ans, cost));
+			val[i] -= f;
+			val[i ^ 1] += f;
+			ans += f;
+			cur[u] = i;
+			if (ans == maxflow)
 			{
 				break;
 			}
 		}
 	}
-	return ansflow;
+	if (ans < maxflow)
+	{
+		dis[u] = -1;
+	}
+	return ans;
 }
 
-int maxflow(int s, int t)
+long long maxflow()
 {
-	int flow = 0;
-	while (bfs(s, t))
+	long long ans = 0;
+	while (bfs())
 	{
-		flow += dfs(s, t, INF);
+		for (int i = 1; i <= n + 2; i++)
+		{
+			cur[i] = head[i];
+		}
+		ans += flow(s, INF);
 	}
-	return flow;
+	return ans;
 }
 
-int main()
-{
-	edgenum = 1;
-	scanf("%d%d", &m, &n);
-	for (int i = 1; i <= m; i++)
-	{
-		int u, v, c;
-		scanf("%d%d%d", &u, &v, &c);
-		add(u, v, c);
-	}
-	printf("%d\n", maxflow(1, n));
-	return 0;
-}
