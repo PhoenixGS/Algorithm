@@ -7,27 +7,30 @@ void Tarjan(int u, int father)
 	for (int i = head[u]; i; i = nextx[i])
 	{
 		int v = vet[i];
-		if (! dfn[v])
+		if (v != father)
 		{
-			Tarjan(v, u);
-			if (low[v] >= dfn[u])
+			if (! dfn[v])
 			{
-				knumber++;
-				points[knumber].push_back(u);
-				belong[u].push_back(knumber);
-				int tmp;
-				do
+				Tarjan(v, u);
+				if (low[v] >= dfn[u])
 				{
-					tmp = stack[top];
-					points[knumber].push_back(tmp);
-					belong[tmp].push_back(knumber);
-				}while(tmp != v);
+					knumber++;
+					points[knumber].push_back(u);
+					belong[u].push_back(knumber);
+					int tmp;
+					do
+					{
+						tmp = stack[top];
+						points[knumber].push_back(tmp);
+						belong[tmp].push_back(knumber);
+					}while(tmp != v);
+				}
+				low[u] = std::min(low[u], low[v]);
 			}
-			low[u] = std::min(low[u], low[v]);
-		}
-		else
-		{
-			low[u] = std::min(low[u], dfn[v]);
+			else
+			{
+				low[u] = std::min(low[u], dfn[v]);
+			}
 		}
 	}
 }
