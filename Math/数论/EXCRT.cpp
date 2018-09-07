@@ -1,40 +1,3 @@
-# 中国剩余定理
-## CRT
-
-$$
-若有n个方程组 \\
-x \equiv a_1(mod\;m_1) \\
-x \equiv a_2(mod\;m_2) \\
-\cdots \\
-x \equiv a_n(mod\;m_n) \\
-且m_i两两互质 \\
-那么设M=\Pi_{i=1}^nm_i,n_i=\frac{M}{m_i}\\
-计算n_i在(mod\;m_i)下的逆元n_i^{-1} \\
-计算c_i=n_i*n_i^{-1} \\
-解x=\sum_{i=1}^na_ic_i
-$$
-
-## 新方法
-合并方程组
-$$ 
-有两个方程组 \\
-x \equiv a_1(mod\;m_1) \\
-x \equiv a_2(mod\;m_2) \\
-那么设p,q使
-x = m_1p+a_1=m_2q+a_2 \\
-那么
-m_1p-m_2q=a_2-a_1 \\
-设
-d=gcd(m_1,m_2) \\
-若d\nmid(a_2-a_1)则无解 \\
-否则可用extend_gcd求出一组p,q \\
-则方程组合并为 \\
-x \equiv m_1p+a_1(mod\;lcm(m_1,m_2))
-$$
-### 代码
-模板题Luogu4777
-
-```c++
 #include <cstdio>
 
 long long read()
@@ -106,11 +69,3 @@ int main()
 	printf("%lld\n", a1);
 	return 0;
 }
-```
-### 参考
-[中国剩余定理](https://oi-wiki.org/math/crt/)
-
-
-## （这方法很垃圾。。
-![3cf0fca6-7543-3c93-98cf-fef5938753](media/3cf0fca6-7543-3c93-98cf-fef5938753c3.png)
-
