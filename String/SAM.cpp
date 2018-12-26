@@ -1,9 +1,9 @@
-void add(int c)
+void extend(int c)
 {
 	knum++;
 	int u = last;
 	int v = knum;
-	last = v;
+	last = knum;
 	len[v] = len[u] + 1;
 	for (; u && ! to[u][c]; u = pre[u])
 	{
@@ -11,7 +11,7 @@ void add(int c)
 	}
 	if (! u)
 	{
-		pre[v] = root;
+		pre[v] = 1;
 		return;
 	}
 	int w = to[u][c];
@@ -23,15 +23,21 @@ void add(int c)
 	knum++;
 	int neww = knum;
 	pre[neww] = pre[w];
-	len[neww] = len[w];
+	len[neww] = len[u] + 1;
 	for (int i = 0; i < 26; i++)
 	{
 		to[neww][i] = to[w][i];
 	}
 	pre[w] = pre[v] = neww;
-	len[neww] = len[u] + 1;
 	for (; u && to[u][c] == w; u = pre[u])
 	{
 		to[u][c] = neww;
 	}
+}
+
+int main()
+{
+	//init
+	last = 1;
+	knum = 1;
 }
