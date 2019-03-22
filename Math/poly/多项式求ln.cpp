@@ -5,8 +5,10 @@ const int M = 998244353, G = 3;
 const int _n = 100000 + 10;
 int n;
 int x[4 * _n], y[4 * _n];
+int N, bit;
 int rev[4 * _n];
 int xx[4 * _n], yy[4 * _n];
+int inv[4 * _n];
 
 int pow_mod(int x, int p, int M)
 {
@@ -108,14 +110,52 @@ void poly_inv(int n, int *x, int *y)
 	}
 }
 
+void poly_ln(int n, int *x, int *y)
+{
+	static int z[4 * _n];
+	int N = 1;
+	int bit = 0;
+	while (N < 2 * n)
+	{
+		N <<= 1;
+		bit++;
+	}
+	for (int i = 0; i < N; i++)
+	{
+		y[i] = z[i] = 0;
+	}
+	poly_inv(n, x, z);
+	for (int i = 0; i < n - 1; i++)
+	{
+		y[i] = (long long)x[i + 1] * (i + 1) % M;
+	}
+	NTT(y, N, 1);
+	NTT(z, N, 1);
+	for (int i = 0; i < N; i++)
+	{
+		y[i] = (long long)y[i] * z[i] % M;
+	}
+	NTT(y, N, -1);
+	for (int i = N - 1; i >= 1; i--)
+	{
+		y[i] = (long long)y[i - 1] * inv[i] % M;
+	}
+	y[0] = 0;
+}
+
 int main()
 {
 	scanf("%d", &n);
+	inv[0] = inv[1] = 1;
+	for (int i = 2; i <= 4 * n; i++)
+	{
+		inv[i] = (long long)(M - M / i) * inv[M % i] % M;
+	}
 	for (int i = 0; i < n; i++)
 	{
 		scanf("%d", &x[i]);
 	}
-	poly_inv(n, x, y);
+	poly_ln(n, x, y);
 	for (int i = 0; i < n; i++)
 	{
 		printf("%d ", (y[i] + M) % M);
@@ -123,4 +163,5 @@ int main()
 	puts("");
 	return 0;
 }
+
 
