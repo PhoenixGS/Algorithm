@@ -129,6 +129,7 @@ void poly_ln(int n, int *x, int *y)
 	{
 		y[i] = (long long)x[i + 1] * (i + 1) % M;
 	}
+	getrev(bit);
 	NTT(y, N, 1);
 	NTT(z, N, 1);
 	for (int i = 0; i < N; i++)
