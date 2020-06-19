@@ -1,27 +1,31 @@
 #include <cstdio>
-#include <cstring>
 #include <algorithm>
+#include <queue>
 
-const int INF = 1e9;
-int edgenum;
-int vet[20000000];
-int cap[20000000];
-int val[20000000];
-int nextx[20000000];
-int head[90000];
-int dis[900000];
-int inque[900000];
-int pre[900000];
-int preedge[900000];
+long long read()
+{
+    char last = '+', ch = getchar();
+    while (ch < '0' || ch > '9') last = ch, ch = getchar();
+    long long tmp = 0;
+    while (ch >= '0' && ch <= '9') tmp = tmp * 10 + ch - 48, ch = getchar();
+    if (last == '-') tmp = -tmp;
+    return tmp;
+}
+
+const long long INF = (long long)1000000000 * 1000000000;
+const int _n = 1000 + 10, _m = 10000 + 10;
 int n, m;
-int s, t;
-int c[1000000];
-int x[1000][1000];
-int que[3000000];
-int T;
-int sum;
+int need[_n];
+int S, T;
+int edgenum;
+int vet[4 * _n + 2 * _m], nextx[4 * _n + 2 * _m], head[_n];
+long long cap[4 * _n + 2 * _m], val[4 * _n + 2 * _m];
+std::queue<int> que;
+long long dis[_n], inque[_n], flow[_n];
+int pre[_n], preedge[_n];
+long long maxflow, mincost;
 
-void add(int u, int v, int c, int cost)
+void add(int u, int v, long long c, long long cost)
 {
     edgenum++;
     vet[edgenum] = v;
@@ -31,129 +35,102 @@ void add(int u, int v, int c, int cost)
     head[u] = edgenum;
 }
 
-bool SPFA(int s, int t)
+bool SPFA(int S, int T)
 {
-    for (int i = 1; i <= n + m * sum + 2; i++)
+    for (int i = 1; i <= n + 3; i++)
     {
         dis[i] = INF;
+        flow[i] = INF;
         inque[i] = 0;
         pre[i] = 0;
         preedge[i] = 0;
+        flow[i] = 0;
     }
-    int headx = 1;
-    int tailx = 1;
-    que[headx] = s;
-    inque[s] = true;
-    dis[s] = 0;
-    while (headx <= tailx)
+    que.push(S);
+    inque[S] = true;
+    dis[S] = 0;
+    flow[S] = INF;
+    while (! que.empty())
     {
-        int u = que[headx];
-        headx++;
+        int u = que.front();
+        que.pop();
         for (int i = head[u]; i; i = nextx[i])
         {
             int v = vet[i];
-            int c = cap[i];
-            int cost = val[i];
-            if (c)
+            long long c = cap[i];
+            long long cost = val[i];
+            if (c && dis[u] + cost < dis[v])
             {
-                if (dis[u] + cost < dis[v])
+                dis[v] = dis[u] + cost;
+                pre[v] = u;
+                preedge[v] = i;
+                flow[v] = std::min(flow[u], c);
+                if (! inque[v])
                 {
-                    //printf("%d %d\n", u, v);
-                    dis[v] = dis[u] + cost;
-                    pre[v] = u;
-                    preedge[v] = i;
-                    if (! inque[v])
-                    {
-                        tailx++;
-                        que[tailx] = v;
-                        inque[v] = true;
-                    }
+                    que.push(v);
+                    inque[v] = true;
                 }
             }
         }
         inque[u] = false;
     }
-    return pre[t] != 0;
+    return pre[T] != 0;
 }
 
-int maxflow(int s, int t)
+void mxflow(int S, int T)
 {
-    int ans = 0;
-    while (SPFA(s, t))
+    while (SPFA(S, T))
     {
-        int minx = INF;
-        int now = t;
-        int kk = now;
-        while (now != s)
+        maxflow += flow[T];
+        mincost += flow[T] * dis[T];
+        int now = T;
+        while (now != S)
         {
-            minx = std::min(minx, cap[preedge[now]]);
-            if (pre[now] == s)
-            {
-                kk = now;
-            }
+            cap[preedge[now]] -= flow[T];
+            cap[preedge[now] ^ 1] += flow[T];
             now = pre[now];
-        }
-        now = t;
-        while (now != s)
-        {
-            cap[preedge[now]] -= minx;
-            cap[preedge[now] ^ 1] += minx;
-            ans += val[preedge[now]] * minx;
-            now = pre[now];
-        }
-        int times = (kk - n - 1) / m + 2;
-        int u = (kk - n - 1) % m + 1;
-        add(s, n + (times - 1) * m + u, 1, 0);
-        add(n + (times - 1) * m + u, s, 0, 0);
-        for (int i = 1; i <= n; i++)
-        {
-            add(n + (times - 1) * m + u, i, 1, times * x[i][u]);
-            add(i, n + (times - 1) * m + u, 0, -times * x[i][u]);
         }
     }
-    return ans;
 }
 
 int main()
 {
-    while (scanf("%d%d", &n, &m) == 2)
+    edgenum = 1;
+    scanf("%d%d", &n, &m);
+    S = n + 2;
+    T = n + 3;
+    for (int i = 1; i <= n; i++)
     {
-        edgenum = 1;
-        memset(head, 0, sizeof(head));
-        sum = 0;
-        for (int i = 1; i <= n; i++)
-        {
-            scanf("%d", &c[i]);
-            sum += c[i];
-        }
-        s = n + sum * m + 1;
-        t = n + sum * m + 2;
-        for (int i = 1; i <= n; i++)
-        {
-            for (int j = 1; j <= m; j++)
-            {
-                scanf("%d", &x[i][j]);
-            }
-        }
-        for (int i = 1; i <= n; i++)
-        {
-            add(i, t, c[i], 0);
-            add(t, i, 0, 0);
-        }
-        for (int i = 1; i <= m; i++)
-        {
-            add(s, n + i, 1, 0);
-            add(n + i, s, 0, 0);
-        }
-        for (int i = 1; i <= n; i++)
-        {
-            for (int j = 1; j <= m; j++)
-            {
-                add(n + j, i, 1, x[i][j]);
-                add(i, n + j, 0, -x[i][j]);
-            }
-        }
-        printf("%d\n", maxflow(s, t));
+        need[i] = read();
     }
+    for (int i = 1; i <= n + 1; i++)
+    {
+        if (need[i] - need[i - 1] > 0)
+        {
+            add(S, i, need[i] - need[i - 1], 0);
+            add(i, S, 0, 0);
+        }
+        if (need[i] - need[i - 1] < 0)
+        {
+            add(i, T, need[i - 1] - need[i], 0);
+            add(T, i, 0, 0);
+        }
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        add(i + 1, i, INF, 0);
+        add(i, i + 1, 0, 0);
+    }
+    for (int i = 1; i <= m; i++)
+    {
+        int l, r, cost;
+        l = read();
+        r = read();
+        cost = read();
+        add(l, r + 1, INF, cost);
+        add(r + 1, l, 0, -cost);
+    }
+    mxflow(S, T);
+    printf("%lld\n", mincost);
     return 0;
 }
